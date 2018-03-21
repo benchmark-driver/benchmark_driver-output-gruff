@@ -60,6 +60,7 @@ class BenchmarkDriver::Output::Gruff
   end
 
   def with_job(job, &block)
+    puts "* #{job.name}..."
     @job = job
     block.call
   end
