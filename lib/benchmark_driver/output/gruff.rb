@@ -47,7 +47,7 @@ class BenchmarkDriver::Output::Gruff
       jobs = @value_by_exec_by_job.keys
       g.labels = Hash[jobs.map.with_index { |job, index| [index, job] }]
       @executables.each do |executable|
-        g.data executable.name, jobs.map { |job| @value_by_exec_by_job[job][executable.name] }
+        g.data executable.description, jobs.map { |job| @value_by_exec_by_job[job][executable.name] }
       end
     end
     g.bar_spacing = 0.6
