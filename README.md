@@ -23,7 +23,11 @@ gem 'benchmark_driver-output-gruff'
 
 ## Usage
 
-TODO: Write usage instructions here
+Specify `-o gruff`/`--output gruff`. Then `graph.png` will be created.
+
+```
+bundle exec benchmark-driver examples/multi.yml -o gruff --rbenv '2.4.2;2.5.0'
+```
 
 ## License
 
