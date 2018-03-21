@@ -29,6 +29,15 @@ Specify `-o gruff`/`--output gruff`. Then `graph.png` will be created.
 bundle exec benchmark-driver examples/multi.yml -o gruff --rbenv '2.4.2;2.5.0'
 ```
 
+## Example
+### benchmark-driver/optcarrot
+
+![](./images/optcarrot.png)
+
+### benchmark-driver/mjit-benchmarks
+
+![](./images/mjit.png)
+
 ## License
 
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
