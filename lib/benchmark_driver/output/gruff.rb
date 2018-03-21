@@ -29,12 +29,14 @@ class BenchmarkDriver::Output::Gruff
     print "rendering graph..."
     g = Gruff::SideBar.new
     g.theme = {
-      colors: ['#3285e1', '#489d32', '#e2c13e', '#12a702', '#aedaa9'],
+      colors: ['#3285e1', '#e2c13e', '#489d32', '#12a702', '#aedaa9', '#6886B4', '#D1695E', '#8A6EAF', '#EFAA43'],
       marker_color: '#dddddd',
       font_color: 'black',
       background_colors: 'white'
     }
     g.x_axis_label = @metrics_type.unit
+    g.legend_font_size = 10.0
+    g.marker_font_size = 14.0
     g.minimum_value = 0
     g.maximum_value = (@value_by_exec_by_job.values.map(&:values).flatten.max * 1.2).to_i
     if @value_by_exec_by_job.keys.size == 1
