@@ -15,10 +15,10 @@ PKG_CONFIG_PATH=/usr/local/opt/imagemagick@6/lib/pkgconfig gem install rmagick
 sudo apt-get install libmagickwand-dev
 ```
 
-And install the following gem.
+And install this gem.
 
 ```ruby
-gem 'benchmark_driver-output-gruff'
+gem install benchmark_driver-output-gruff
 ```
 
 ## Usage
