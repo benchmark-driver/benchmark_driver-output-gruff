@@ -17,7 +17,7 @@ sudo apt-get install libmagickwand-dev
 
 And install this gem.
 
-```ruby
+```bash
 gem install benchmark_driver-output-gruff
 ```
 
