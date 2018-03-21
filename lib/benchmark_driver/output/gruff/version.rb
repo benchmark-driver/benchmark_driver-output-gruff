@@ -1,6 +1,6 @@
 module BenchmarkDriver
   module Output
-    module Gruff
+    class Gruff
       VERSION = "0.1.0"
     end
   end
