@@ -1,31 +1,18 @@
 require 'gruff'
-require 'benchmark_driver/output/gruff/version'
+require 'benchmark_driver'
 
-class BenchmarkDriver::Output::Gruff
+class BenchmarkDriver::Output::Gruff < BenchmarkDriver::BulkOutput
   GRAPH_PATH = 'graph.png'
 
-  # @param [BenchmarkDriver::Metrics::Type] metrics_type
-  attr_writer :metrics_type
-
-  # @param [Array<BenchmarkDriver::*::Job>] jobs
-  # @param [Array<BenchmarkDriver::Config::Executable>] executables
-  def initialize(jobs:, executables:)
-    @jobs = jobs
-    @executables = executables
-    @value_by_exec_by_job = Hash.new { |h, k| h[k] = {} }
+  # @param [Array<String>] job_names
+  # @param [Array<String>] context_names
+  def initialize(job_names:, context_names:)
+    @context_names = context_names
   end
 
-  def with_warmup(&block)
-    # noop
-    puts "warming up..."
-    block.call
-  end
-
-  def with_benchmark(&block)
-    @with_benchmark = true
-    puts "running benchmark..."
-    result = block.call
-
+  # @param [Hash{ BenchmarkDriver::Job => Hash{ BenchmarkDriver::Context => { BenchmarkDriver::Metric => Float } } }] result
+  # @param [Array<BenchmarkDriver::Metric>] metrics
+  def bulk_output(result:, metrics:)
     print "rendering graph..."
     g = Gruff::SideBar.new
     g.theme = {
@@ -34,41 +21,41 @@ class BenchmarkDriver::Output::Gruff
       font_color: 'black',
       background_colors: 'white'
     }
-    g.x_axis_label = @metrics_type.unit
+    metric = metrics.first # only one metric is supported for now
+    g.x_axis_label = metric.unit
     g.legend_font_size = 10.0
     g.marker_font_size = 14.0
     g.minimum_value = 0
-    g.maximum_value = (@value_by_exec_by_job.values.map(&:values).flatten.max * 1.2).to_i
-    if @value_by_exec_by_job.keys.size == 1
+    g.maximum_value = (result.values.map(&:values).flatten.map(&:values).flatten.max * 1.2).to_i
+    if result.keys.size == 1
       # Use Ruby version for base axis
-      job = @value_by_exec_by_job.keys.first
-      g.labels = Hash[@executables.map.with_index { |exec, index| [index, exec.name] } ]
-      g.data job, @executables.map { |exec| @value_by_exec_by_job[job][exec.name] }
+      job = result.keys.first
+      g.labels = Hash[result[job].keys.map.with_index { |context, index| [index, context.name] } ]
+      g.data job.name, result[job].map { |_, metric_value| metric_value[metric] }
     else
       # Use benchmark name for base axis, use different colors for different Ruby versions
-      jobs = @value_by_exec_by_job.keys
-      g.labels = Hash[jobs.map.with_index { |job, index| [index, job] }]
-      @executables.each do |executable|
-        g.data executable.description, jobs.map { |job| @value_by_exec_by_job[job][executable.name] }
+      jobs = result.keys
+      g.labels = Hash[jobs.map.with_index { |job, index| [index, job.name] }]
+      @context_names.each do |context_name|
+        context = @result[jobs.first].keys.find { |c| c.name == context_name }
+        g.data context.executable.description, jobs.map { |job|
+          _, metric_value = @result[job].find { |context, _| context.name == context_name }
+          metric_value[metric]
+        }
       end
     end
     g.bar_spacing = 0.6
     g.write(GRAPH_PATH)
     puts ": #{GRAPH_PATH}"
-
-    result
   end
 
   def with_job(job, &block)
     puts "* #{job.name}..."
-    @job = job
-    block.call
+    super
   end
 
-  # @param [BenchmarkDriver::Metrics] metrics
-  def report(metrics)
-    if @with_benchmark
-      @value_by_exec_by_job[@job.name][metrics.executable.name] = metrics.value
-    end
+  def with_context(context, &block)
+    puts "  * #{context.name}..."
+    super
   end
 end

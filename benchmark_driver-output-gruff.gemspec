@@ -1,11 +1,10 @@
 
 lib = File.expand_path("../lib", __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require "benchmark_driver/output/gruff/version"
 
 Gem::Specification.new do |spec|
   spec.name          = "benchmark_driver-output-gruff"
-  spec.version       = BenchmarkDriver::Output::Gruff::VERSION
+  spec.version       = "0.1.1"
   spec.authors       = ["Takashi Kokubun"]
   spec.email         = ["takashikkbn@gmail.com"]
 
@@ -21,7 +20,7 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "benchmark_driver", ">= 0.10.12"
+  spec.add_dependency "benchmark_driver", ">= 0.11.1"
   spec.add_dependency "gruff"
   spec.add_development_dependency "bundler", "~> 1.16"
   spec.add_development_dependency "rake", "~> 10.0"
