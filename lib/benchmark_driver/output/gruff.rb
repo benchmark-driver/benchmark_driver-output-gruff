@@ -4,15 +4,17 @@ require 'benchmark_driver'
 class BenchmarkDriver::Output::Gruff < BenchmarkDriver::BulkOutput
   GRAPH_PATH = 'graph.png'
 
-  # @param [Array<String>] job_names
-  # @param [Array<String>] context_names
-  def initialize(job_names:, context_names:)
-    @context_names = context_names
+  # @param [Array<BenchmarkDriver::Metric>] metrics
+  # @param [Array<BenchmarkDriver::Job>] jobs
+  # @param [Array<BenchmarkDriver::Context>] contexts
+  def initialize(contexts:, **)
+    super
+    @contexts = contexts
   end
 
   # @param [Hash{ BenchmarkDriver::Job => Hash{ BenchmarkDriver::Context => { BenchmarkDriver::Metric => Float } } }] result
   # @param [Array<BenchmarkDriver::Metric>] metrics
-  def bulk_output(result:, metrics:)
+  def bulk_output(job_context_result:, metrics:)
     print "rendering graph..."
     g = Gruff::SideBar.new
     g.theme = {
@@ -26,21 +28,20 @@ class BenchmarkDriver::Output::Gruff < BenchmarkDriver::BulkOutput
     g.legend_font_size = 10.0
     g.marker_font_size = 14.0
     g.minimum_value = 0
-    g.maximum_value = (result.values.map(&:values).flatten.map(&:values).flatten.max * 1.2).to_i
-    if result.keys.size == 1
+    results = job_context_result.values.map(&:values).flatten
+    g.maximum_value = (results.map(&:values).map(&:values).flatten.max * 1.2).to_i
+    if job_context_result.keys.size == 1
       # Use Ruby version for base axis
-      job = result.keys.first
-      g.labels = Hash[result[job].keys.map.with_index { |context, index| [index, context.name] } ]
-      g.data job.name, result[job].map { |_, metric_value| metric_value[metric] }
+      job = job_context_result.keys.first
+      g.labels = Hash[job_context_result[job].keys.map.with_index { |context, index| [index, context.name] }]
+      g.data job.name, job_context_result[job].values.map { |result| result.values.fetch(metric) }
     else
       # Use benchmark name for base axis, use different colors for different Ruby versions
-      jobs = result.keys
+      jobs = job_context_result.keys
       g.labels = Hash[jobs.map.with_index { |job, index| [index, job.name] }]
-      @context_names.each do |context_name|
-        context = @result[jobs.first].keys.find { |c| c.name == context_name }
+      @contexts.each do |context|
         g.data context.executable.description, jobs.map { |job|
-          _, metric_value = @result[job].find { |context, _| context.name == context_name }
-          metric_value[metric]
+          job_context_result[job][context].values.fetch(metric)
         }
       end
     end
