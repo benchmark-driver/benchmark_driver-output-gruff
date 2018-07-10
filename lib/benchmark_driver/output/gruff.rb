@@ -40,7 +40,7 @@ class BenchmarkDriver::Output::Gruff < BenchmarkDriver::BulkOutput
       jobs = job_context_result.keys
       g.labels = Hash[jobs.map.with_index { |job, index| [index, job.name] }]
       @contexts.each do |context|
-        g.data context.executable.description, jobs.map { |job|
+        g.data context.name, jobs.map { |job|
           job_context_result[job][context].values.fetch(metric)
         }
       end
